@@ -80,7 +80,6 @@ const Footer = () => {
           <div className="flex gap-6 items-center">
             <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Privacy Policy</a>
             <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Cookie Policy</a>
-            <Link to="/admin" className="text-gray-600 hover:text-emerald-400 text-xs transition-colors border border-white/5 hover:border-emerald-500/30 px-3 py-1 rounded-full">⚙ Admin</Link>
           </div>
         </div>
       </div>

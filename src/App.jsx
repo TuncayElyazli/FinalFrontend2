@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
@@ -12,12 +12,24 @@ import AdminLayout from './components/AdminLayout';
 import AdminLogin from './components/AdminLogin';
 import ScrollToTop from './components/ScrollToTop';
 
-// ── Auth helpers ──────────────────────────────────────────────────────────────
-const isAdminAuthenticated = () => !!localStorage.getItem('adminToken');
-
 // ── ProtectedRoute wrapper ────────────────────────────────────────────────────
-const ProtectedAdminRoute = ({ children }) => {
-  return isAdminAuthenticated() ? children : <Navigate to="/admin/login" replace />;
+// Reads from React state (isAdmin) passed as prop — never reads localStorage directly.
+const ProtectedAdminRoute = ({ isAdmin, children }) => {
+  return isAdmin ? children : <Navigate to="/admin/login" replace />;
+};
+
+// ── AdminLoginRoute: always clears stale token before showing login form ──────
+const AdminLoginRoute = ({ isAdmin, onLoginSuccess }) => {
+  useEffect(() => {
+    // Wipe any persisted token every time this route mounts
+    localStorage.removeItem('adminToken');
+  }, []);
+
+  // After the effect runs the parent will set isAdmin=false.
+  // If somehow still true (first render), redirect to dashboard.
+  return isAdmin
+    ? <Navigate to="/admin" replace />
+    : <AdminLogin onLoginSuccess={onLoginSuccess} />;
 };
 
 // ── Consumer layout (Navbar + Footer) ────────────────────────────────────────
@@ -46,6 +58,11 @@ function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authInitialView, setAuthInitialView] = useState('login');
 
+  // ── Admin auth state: ALWAYS starts as false (logged out) ─────────────────
+  // We intentionally do NOT read localStorage here on mount so that a stale
+  // persisted token can never silently bypass the login form.
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const openAuth = (viewType) => {
     setAuthInitialView(viewType);
     setIsAuthModalOpen(true);
@@ -57,12 +74,15 @@ function App() {
   };
 
   const handleAdminLoginSuccess = () => {
+    setIsAdmin(true);
     navigate('/admin');
   };
 
   const handleAdminLogout = () => {
+    // Clear both React state AND persisted token
+    setIsAdmin(false);
     localStorage.removeItem('adminToken');
-    navigate('/');
+    navigate('/admin/login');
   };
 
   // Pages that use the consumer Navbar + Footer
@@ -100,15 +120,16 @@ function App() {
         <Route
           path="/admin/login"
           element={
-            isAdminAuthenticated()
-              ? <Navigate to="/admin" replace />
-              : <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />
+            <AdminLoginRoute
+              isAdmin={isAdmin}
+              onLoginSuccess={handleAdminLoginSuccess}
+            />
           }
         />
         <Route
           path="/admin"
           element={
-            <ProtectedAdminRoute>
+            <ProtectedAdminRoute isAdmin={isAdmin}>
               <AdminLayout onLogout={handleAdminLogout} />
             </ProtectedAdminRoute>
           }
@@ -116,7 +137,7 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedAdminRoute>
+            <ProtectedAdminRoute isAdmin={isAdmin}>
               <AdminLayout onLogout={handleAdminLogout} />
             </ProtectedAdminRoute>
           }

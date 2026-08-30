@@ -8,11 +8,15 @@ const HeroSection = ({ onBookNow }) => {
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   useEffect(() => {
+    // Pause autoplay while a trailer is open; restart fresh when it closes
+    if (isTrailerOpen) return;
+
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % trendingMovies.length);
     }, 6000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [isTrailerOpen]);
 
   return (
     <div className="relative w-full h-[85vh] min-h-[600px] bg-slate-950 overflow-hidden">

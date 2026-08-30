@@ -18,7 +18,7 @@ const AdminLayout = ({ onLogout }) => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'overview': return <AdminDashboard />;
+      case 'overview': return <AdminDashboard onLogout={onLogout} />;
       case 'movies': return <AdminMovies />;
       case 'showtimes': return <AdminShowtimes />;
       case 'users': return <AdminUsers />;

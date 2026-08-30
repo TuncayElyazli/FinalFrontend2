@@ -1,7 +1,7 @@
 import React from 'react';
-import { DollarSign, Film, Users, TrendingUp } from 'lucide-react';
+import { DollarSign, Film, Users, TrendingUp, LogOut } from 'lucide-react';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onLogout }) => {
   const stats = [
     { label: 'Total Revenue', value: '$124,500', icon: DollarSign, trend: '+12.5%', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
     { label: 'Active Movies', value: '24', icon: Film, trend: '+3', color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
@@ -11,6 +11,22 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Header row with Logout button */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Dashboard Overview</h2>
+          <p className="text-gray-400 text-sm mt-1">Welcome back, Administrator</p>
+        </div>
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 text-red-400 hover:text-red-300 rounded-xl font-semibold text-sm transition-all duration-300 group"
+          >
+            <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Logout
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div 
