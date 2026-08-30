@@ -5,7 +5,7 @@ import AdminMovies from './AdminMovies';
 import AdminShowtimes from './AdminShowtimes';
 import AdminUsers from './AdminUsers';
 
-const AdminLayout = ({ onExit }) => {
+const AdminLayout = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const navigation = [
@@ -55,11 +55,11 @@ const AdminLayout = ({ onExit }) => {
 
         <div className="p-4 border-t border-white/10">
           <button 
-            onClick={onExit}
+            onClick={onLogout}
             className="w-full flex items-center px-4 py-3 rounded-xl text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group"
           >
             <LogOut className="w-5 h-5 mr-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Exit Admin</span>
+            <span className="font-medium">Logout</span>
           </button>
         </div>
       </aside>

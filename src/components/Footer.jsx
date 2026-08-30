@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Film } from 'lucide-react';
 
 const Facebook = (props) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>;
@@ -76,9 +77,10 @@ const Footer = () => {
           <p className="text-gray-500 text-sm">
             &copy; {new Date().getFullYear()} CineVerse. All rights reserved.
           </p>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Privacy Policy</a>
             <a href="#" className="text-gray-500 hover:text-white text-sm transition-colors">Cookie Policy</a>
+            <Link to="/admin" className="text-gray-600 hover:text-emerald-400 text-xs transition-colors border border-white/5 hover:border-emerald-500/30 px-3 py-1 rounded-full">⚙ Admin</Link>
           </div>
         </div>
       </div>

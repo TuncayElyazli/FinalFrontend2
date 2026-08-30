@@ -1,38 +1,41 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Film } from 'lucide-react';
 
-const Navbar = ({ onNavigate, currentView, onOpenAuth }) => {
+const Navbar = ({ onOpenAuth }) => {
+  const location = useLocation();
+
   return (
     <nav className="fixed w-full z-50 transition-all duration-300 bg-slate-950/80 backdrop-blur-md border-b border-white/10">
       <div className="max-w-[1440px] mx-auto px-8 py-4 flex items-center justify-between">
-        <div 
+        <Link 
+          to="/"
           className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => onNavigate('home')}
         >
           <Film className="w-8 h-8 text-cyan-400 group-hover:rotate-12 transition-transform duration-300" />
           <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:to-white transition-colors duration-300">
             CineVerse
           </span>
-        </div>
+        </Link>
         
         <div className="flex items-center gap-8">
-          <button 
-            onClick={() => onNavigate('home')}
-            className={`text-sm font-medium relative group transition-colors duration-300 ${currentView === 'home' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+          <Link 
+            to="/"
+            className={`text-sm font-medium relative group transition-colors duration-300 ${location.pathname === '/' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
           >
             Home
-            <span className={`absolute -bottom-1 left-0 h-0.5 bg-cyan-400 transition-all duration-300 ${currentView === 'home' ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-          </button>
-          <button 
-            onClick={() => onNavigate('catalog')}
-            className={`text-sm font-medium relative group transition-colors duration-300 ${currentView === 'catalog' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
+            <span className={`absolute -bottom-1 left-0 h-0.5 bg-cyan-400 transition-all duration-300 ${location.pathname === '/' ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+          </Link>
+          <Link 
+            to="/catalog"
+            className={`text-sm font-medium relative group transition-colors duration-300 ${location.pathname === '/catalog' ? 'text-white' : 'text-gray-300 hover:text-white'}`}
           >
             Movies
-            <span className={`absolute -bottom-1 left-0 h-0.5 bg-cyan-400 transition-all duration-300 ${currentView === 'catalog' ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-          </button>
+            <span className={`absolute -bottom-1 left-0 h-0.5 bg-cyan-400 transition-all duration-300 ${location.pathname === '/catalog' ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+          </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button 
             onClick={() => onOpenAuth('login')}
             className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-300 px-4 py-2"

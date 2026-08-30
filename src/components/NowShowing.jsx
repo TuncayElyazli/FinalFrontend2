@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Star, Ticket } from 'lucide-react';
 import { nowShowing } from '../data/movies';
 
@@ -24,9 +25,10 @@ const NowShowing = ({ onBookNow, onNavigate }) => {
 
         <div className="grid grid-cols-4 gap-6">
           {nowShowing.map((movie, index) => (
-            <div 
+            <Link 
+              to={`/movie/${movie.id}`}
               key={movie.id} 
-              className="group relative rounded-2xl overflow-hidden cursor-pointer animate-fade-in aspect-[2/3]"
+              className="group relative rounded-2xl overflow-hidden cursor-pointer animate-fade-in aspect-[2/3] block bg-slate-900 border border-white/5 hover:border-cyan-500/30 transition-all duration-300"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <img 
@@ -43,18 +45,24 @@ const NowShowing = ({ onBookNow, onNavigate }) => {
               </div>
               
               <div className="absolute bottom-0 left-0 w-full p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 ease-out">
-                <p className="text-cyan-400 text-xs font-semibold mb-1 uppercase tracking-wider">{movie.genre}</p>
+                <p className="text-cyan-400 text-xs font-semibold mb-1 uppercase tracking-wider">
+                  {movie.genres?.join(', ') || movie.genre}
+                </p>
                 <h3 className="text-xl font-bold text-white mb-4 line-clamp-1 group-hover:line-clamp-none transition-all">{movie.title}</h3>
                 
                 <button 
-                  onClick={() => onBookNow(movie)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onBookNow(movie);
+                  }}
                   className="w-full bg-cyan-500/20 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/50 hover:border-cyan-500 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                 >
                   <Ticket className="w-4 h-4" />
                   Quick Book
                 </button>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

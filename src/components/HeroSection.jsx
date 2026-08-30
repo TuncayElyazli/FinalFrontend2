@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Calendar, Star, Info } from 'lucide-react';
+import { Play, Calendar, Star, Video } from 'lucide-react';
 import { trendingMovies } from '../data/movies';
+import TrailerModal from './TrailerModal';
 
 const HeroSection = ({ onBookNow }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -63,9 +65,12 @@ const HeroSection = ({ onBookNow }) => {
                   <Play className="w-5 h-5 fill-current" />
                   Book Tickets
                 </button>
-                <button className="flex items-center gap-2 bg-white/10 text-white px-8 py-3 rounded-full font-bold hover:bg-white/20 hover:scale-105 backdrop-blur-md transition-all duration-300">
-                  <Info className="w-5 h-5" />
-                  More Info
+                <button 
+                  onClick={() => setIsTrailerOpen(true)}
+                  className="flex items-center gap-2 bg-white/10 text-white px-8 py-3 rounded-full font-bold hover:bg-white/20 hover:scale-105 backdrop-blur-md transition-all duration-300"
+                >
+                  <Video className="w-5 h-5" />
+                  Watch Trailer
                 </button>
               </div>
             </div>
@@ -86,6 +91,13 @@ const HeroSection = ({ onBookNow }) => {
           />
         ))}
       </div>
+
+      <TrailerModal 
+        isOpen={isTrailerOpen} 
+        onClose={() => setIsTrailerOpen(false)} 
+        youtubeId={trendingMovies[currentIndex]?.youtubeId}
+        title={trendingMovies[currentIndex]?.title}
+      />
     </div>
   );
 };

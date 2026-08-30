@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Star, Ticket, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Star, Ticket, Filter, Video } from 'lucide-react';
 import { allMovies } from '../data/movies';
+import TrailerModal from './TrailerModal';
 
 const MoviesCatalog = ({ onBookNow }) => {
   const [activeFilter, setActiveFilter] = useState('All');
+  const [selectedTrailer, setSelectedTrailer] = useState(null);
   
   // Extract unique genres from all movies
   const allGenres = ['All', ...new Set(allMovies.flatMap(movie => movie.genres))];
@@ -47,9 +50,10 @@ const MoviesCatalog = ({ onBookNow }) => {
         {/* Movies Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {filteredMovies.map((movie, index) => (
-            <div 
+            <Link 
+              to={`/movie/${movie.id}`}
               key={movie.id} 
-              className="group relative rounded-2xl overflow-hidden cursor-pointer animate-fade-in aspect-[2/3] bg-slate-900"
+              className="group relative rounded-2xl overflow-hidden cursor-pointer animate-fade-in aspect-[2/3] block bg-slate-900 border border-white/5 hover:border-cyan-500/30 transition-all duration-300"
               style={{ animationDelay: `${(index % 10) * 50}ms` }}
             >
               <img 
@@ -74,18 +78,32 @@ const MoviesCatalog = ({ onBookNow }) => {
                   {movie.title}
                 </h3>
                 
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onBookNow(movie);
-                  }}
-                  className="w-full bg-cyan-500/20 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/50 hover:border-cyan-500 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                >
-                  <Ticket className="w-4 h-4" />
-                  Select Seats
-                </button>
+                <div className="flex gap-2 w-full mt-4">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedTrailer(movie);
+                    }}
+                    title="Watch Trailer"
+                    className="flex-shrink-0 w-12 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100"
+                  >
+                    <Video className="w-5 h-5" />
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onBookNow(movie);
+                    }}
+                    className="flex-1 bg-cyan-500/20 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950 border border-cyan-500/50 hover:border-cyan-500 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    Book
+                  </button>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
           
           {filteredMovies.length === 0 && (
@@ -95,6 +113,13 @@ const MoviesCatalog = ({ onBookNow }) => {
           )}
         </div>
       </div>
+
+      <TrailerModal 
+        isOpen={!!selectedTrailer} 
+        onClose={() => setSelectedTrailer(null)} 
+        youtubeId={selectedTrailer?.youtubeId}
+        title={selectedTrailer?.title}
+      />
     </div>
   );
 };

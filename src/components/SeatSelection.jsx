@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { allMovies } from '../data/movies';
 
 const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 const COLS = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -8,7 +10,13 @@ const TICKET_PRICE = 15; // $15 per ticket
 // Mock some already booked seats
 const MOCK_BOOKED = ['A-5', 'A-6', 'D-4', 'D-5', 'D-6', 'G-1', 'G-2', 'J-9', 'J-10'];
 
-const SeatSelection = ({ movie, onBack }) => {
+const SeatSelection = ({ movie: propMovie, onBack: propOnBack }) => {
+  const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const movie = propMovie || location.state?.movie || allMovies.find(m => String(m.id) === String(id));
+  const onBack = propOnBack || (() => navigate(-1));
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 

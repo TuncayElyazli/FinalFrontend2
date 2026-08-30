@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 
-const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
+const AuthModal = ({ isOpen, onClose, initialView = 'login', onNavigate }) => {
   const [view, setView] = useState(initialView);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -26,12 +29,25 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoginError('');
     setIsLoading(true);
-    // Simulate API call
+
     setTimeout(() => {
       setIsLoading(false);
-      handleClose();
-    }, 2000);
+
+      if (view === 'login') {
+        // Strict admin credential check
+        if (username === 'admin' && password === 'admin') {
+          handleClose();
+          if (onNavigate) onNavigate('admin');
+        } else {
+          setLoginError('Invalid username or password.');
+        }
+      } else {
+        // Register: just close for now (no backend)
+        handleClose();
+      }
+    }, 1000);
   };
 
   return (
@@ -89,10 +105,13 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
             >
               <div className="space-y-5">
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
                   <input 
-                    type="email" 
-                    placeholder="Email Address" 
+                    type="text" 
+                    placeholder="Username" 
+                    value={username}
+                    onChange={(e) => { setUsername(e.target.value); setLoginError(''); }}
+                    autoComplete="username"
                     className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
                     required
                   />
@@ -103,7 +122,14 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
                   <input 
                     type={showPassword ? "text" : "password"} 
                     placeholder="Password" 
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all shadow-inner"
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setLoginError(''); }}
+                    autoComplete="current-password"
+                    className={`w-full bg-slate-950/50 border rounded-xl py-3 pl-12 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-all shadow-inner ${
+                      loginError 
+                        ? 'border-red-500/70 focus:border-red-500 focus:ring-red-500/50' 
+                        : 'border-white/10 focus:border-cyan-400 focus:ring-cyan-400'
+                    }`}
                     required
                   />
                   <button 
@@ -127,6 +153,13 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
                   </label>
                   <a href="#" className="text-sm text-cyan-400 hover:text-cyan-300 font-medium hover:underline underline-offset-4 transition-all">Forgot Password?</a>
                 </div>
+
+                {/* Error message */}
+                {loginError && (
+                  <p className="text-red-400 text-sm text-center font-medium animate-fade-in">
+                    {loginError}
+                  </p>
+                )}
 
                 <button 
                   type="submit" 

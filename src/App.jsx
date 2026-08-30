@@ -1,20 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import NowShowing from './components/NowShowing';
 import MoviesCatalog from './components/MoviesCatalog';
+import MovieDetails from './components/MovieDetails';
 import SeatSelection from './components/SeatSelection';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import AdminLayout from './components/AdminLayout';
+import AdminLogin from './components/AdminLogin';
+import ScrollToTop from './components/ScrollToTop';
 
+// ── Auth helpers ──────────────────────────────────────────────────────────────
+const isAdminAuthenticated = () => !!localStorage.getItem('adminToken');
+
+// ── ProtectedRoute wrapper ────────────────────────────────────────────────────
+const ProtectedAdminRoute = ({ children }) => {
+  return isAdminAuthenticated() ? children : <Navigate to="/admin/login" replace />;
+};
+
+// ── Consumer layout (Navbar + Footer) ────────────────────────────────────────
+const ConsumerLayout = ({ children, onOpenAuth, currentPath }) => (
+  <>
+    <Navbar onOpenAuth={onOpenAuth} currentPath={currentPath} />
+    {children}
+    <Footer />
+  </>
+);
+
+// ── Home Page ─────────────────────────────────────────────────────────────────
+const HomePage = ({ onBookNow }) => {
+  const navigate = useNavigate();
+  return (
+    <>
+      <HeroSection onBookNow={onBookNow} />
+      <NowShowing onBookNow={onBookNow} onNavigate={() => navigate('/catalog')} />
+    </>
+  );
+};
+
+// ── App ───────────────────────────────────────────────────────────────────────
 function App() {
-  const [currentView, setCurrentView] = useState(() => {
-    const hash = window.location.hash.replace('#', '');
-    return ['home', 'catalog', 'seats', 'admin'].includes(hash) ? hash : 'home';
-  });
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  
+  const navigate = useNavigate();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authInitialView, setAuthInitialView] = useState('login');
 
@@ -23,61 +51,89 @@ function App() {
     setIsAuthModalOpen(true);
   };
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (['home', 'catalog', 'seats', 'admin'].includes(hash)) {
-        setCurrentView(hash);
-      } else if (!hash) {
-        setCurrentView('home');
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const handleNavigate = (view) => {
-    window.location.hash = view;
-    window.scrollTo(0, 0);
-  };
-
   const handleBookNow = (movie) => {
-    setSelectedMovie(movie);
-    setCurrentView('seats');
+    navigate(`/seats/${movie.id}`, { state: { movie } });
     window.scrollTo(0, 0);
   };
+
+  const handleAdminLoginSuccess = () => {
+    navigate('/admin');
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/');
+  };
+
+  // Pages that use the consumer Navbar + Footer
+  const consumerPaths = ['/', '/catalog', '/movie/:id', '/seats/:id'];
+  const currentPath = window.location.pathname;
+  const isConsumerPage = !currentPath.startsWith('/admin');
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans selection:bg-cyan-500/30">
-      {currentView !== 'admin' && (
-        <Navbar onNavigate={handleNavigate} currentView={currentView} onOpenAuth={openAuth} />
-      )}
-      
-      {currentView === 'home' && (
-        <>
-          <HeroSection onBookNow={handleBookNow} />
-          <NowShowing onBookNow={handleBookNow} onNavigate={() => handleNavigate('catalog')} />
-        </>
+      <ScrollToTop />
+      {isConsumerPage && (
+        <Navbar onOpenAuth={openAuth} />
       )}
 
-      {currentView === 'catalog' && (
-        <MoviesCatalog onBookNow={handleBookNow} />
-      )}
+      <Routes>
+        {/* ── Consumer Routes ───────────────────────────────────────────── */}
+        <Route
+          path="/"
+          element={<HomePage onBookNow={handleBookNow} />}
+        />
+        <Route
+          path="/catalog"
+          element={<MoviesCatalog onBookNow={handleBookNow} />}
+        />
+        <Route
+          path="/movie/:id"
+          element={<MovieDetails />}
+        />
+        <Route
+          path="/seats/:id"
+          element={<SeatSelection onBack={() => navigate('/catalog')} />}
+        />
 
-      {currentView === 'seats' && (
-        <SeatSelection movie={selectedMovie} onBack={() => handleNavigate('catalog')} />
-      )}
+        {/* ── Admin Routes ──────────────────────────────────────────────── */}
+        <Route
+          path="/admin/login"
+          element={
+            isAdminAuthenticated()
+              ? <Navigate to="/admin" replace />
+              : <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout onLogout={handleAdminLogout} />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedAdminRoute>
+              <AdminLayout onLogout={handleAdminLogout} />
+            </ProtectedAdminRoute>
+          }
+        />
 
-      {currentView === 'admin' && (
-        <AdminLayout onExit={() => handleNavigate('home')} />
-      )}
+        {/* ── 404 Fallback ──────────────────────────────────────────────── */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
-      {currentView !== 'seats' && currentView !== 'admin' && <Footer />}
+      {isConsumerPage && !currentPath.startsWith('/seats') && <Footer />}
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-        initialView={authInitialView} 
+      {/* Consumer Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialView={authInitialView}
+        onNavigate={(view) => navigate(`/${view}`)}
       />
     </div>
   );
